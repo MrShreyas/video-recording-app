@@ -1,8 +1,12 @@
-version: "3.9"
 services:
-  app:
+  video-recording-app:
     image: video-recording-app
-    ports:
-      - "3000:3000"
+    container_name: video-recording-app
     env_file:
       - .env.local
+    networks:
+      - flow_net
+
+networks:
+  flow_net:
+    external: true

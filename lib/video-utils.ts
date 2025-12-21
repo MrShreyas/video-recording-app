@@ -41,12 +41,10 @@ async function ensureFFmpeg(): Promise<any | null> {
     // Attach logger/progress if available to surface internal ffmpeg messages
     try {
       if (typeof ffmpegInstance.setLogger === "function") {
-        ffmpegInstance.setLogger(({ type, message }: any) => {
-        });
+        ffmpegInstance.setLogger(({ type, message }: any) => {});
       }
       if (typeof ffmpegInstance.setProgress === "function") {
-        ffmpegInstance.setProgress((p: any) => {
-        });
+        ffmpegInstance.setProgress((p: any) => {});
       }
     } catch (e) {
       console.warn("Failed to attach ffmpeg logger/progress", e);
@@ -308,15 +306,18 @@ export async function trimVideo(
     await ffWriteFile(ff, api, inputName, data);
     const dur = Math.max(0, endSec - startSec);
     try {
+      // Fast seeking: Put -ss AFTER -i for better accuracy with copy
       await ffRunWithTimeout(ff, api, [
-        "-ss",
-        String(startSec),
         "-i",
-        inputName,
+        inputName, // Input first
+        "-ss",
+        String(startSec), // Seek precisely
         "-t",
-        String(dur),
+        String(dur), // Duration
         "-c",
         "copy",
+        "-avoid_negative_ts",
+        "make_zero", // Critical for start-trimming issues
         outName,
       ]);
     } catch (e) {
@@ -364,11 +365,11 @@ async function exportMp4ViaApi(blob: Blob): Promise<Blob> {
 }
 
 async function fetchVideoBlob(url: string): Promise<Blob> {
-  const res = await fetch(url)
+  const res = await fetch(url);
   if (!res.ok) {
-    throw new Error(`Failed to fetch trimmed video: ${res.status}`)
+    throw new Error(`Failed to fetch trimmed video: ${res.status}`);
   }
-  return await res.blob()
+  return await res.blob();
 }
 
 export async function exportVideo(

@@ -138,20 +138,6 @@ export default function VideoEditor({ recordingId }: { recordingId?: string }) {
 
             {/* Video Controls */}
             <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Button size="sm" variant="outline" onClick={() => setIsPlaying(!isPlaying)} className="shrink-0">
-                  {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
-                </Button>
-                <span className="text-sm font-mono shrink-0">{formatTime(currentTime)}</span>
-                <Slider
-                  value={[currentTime]}
-                  max={duration}
-                  step={1}
-                  onValueChange={(value) => setCurrentTime(value[0])}
-                  className="flex-1"
-                />
-                <span className="text-sm font-mono shrink-0">{formatTime(duration)}</span>
-              </div>
 
               {/* Trim Controls */}
               <div className="pt-4 border-t border-border space-y-3">

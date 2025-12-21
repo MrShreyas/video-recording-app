@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Progress } from "@/components/ui/progress"
-import { uploadVideo, generateShareLink } from "@/lib/upload-utils"
+import { uploadVideo } from "@/lib/upload-utils"
 
 export default function UploadInterface({id} : {id: string}) {
   const [isUploading, setIsUploading] = useState(false)
@@ -24,14 +24,13 @@ export default function UploadInterface({id} : {id: string}) {
     const interval = setInterval(() => setUploadProgress((p) => Math.min(95, p + 10)), 300)
 
     try {
-      const s3Url = await uploadVideo(id)
-      const key = s3Url.split('/').pop() || id
-      const publicUrl = generateShareLink(key)
+      const shareableUrl = await uploadVideo(id)
+      console.log('Shareable URL:', shareableUrl)
       clearInterval(interval)
       setUploadProgress(100)
       setIsUploading(false)
       setIsComplete(true)
-      setShareUrl(publicUrl)
+      setShareUrl(shareableUrl)
     } catch (err) {
       clearInterval(interval)
       console.error('Upload failed', err)

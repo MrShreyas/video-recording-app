@@ -1,47 +1,54 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Play, Eye, Clock, Check, Copy } from "lucide-react"
-import { Card } from "@/components/ui/card"
-import { trackView, trackWatchProgress } from "@/lib/analytics-utils"
-import { Button } from "./ui/button"
-import { Input } from "./ui/input"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Play, Eye, Clock, Check, Copy } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { trackView, trackWatchProgress } from "@/lib/analytics-utils";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 export default function WatchPage({ videoId }: { videoId: string }) {
-  const [isPlaying, setIsPlaying] = useState(false)
-  const [views, setViews] = useState(0)
-  const [videoSrc, setVideoSrc] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [copied, setCopied] = useState(false)
-  const shareUrl = `${process.env.NEXT_PUBLIC_APP_DOMAIN}/api/v/${videoId}`
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [views, setViews] = useState(0);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN
+  const cdnDomain = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
+
+  const shareUrl = appDomain ? `${appDomain}/api/v/${videoId}` : "";
 
   useEffect(() => {
-    // Set video src from S3
-    const cdn = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN
-
-    if (cdn) {
-      setVideoSrc(`${cdn}/${videoId}`)
+    // console.log("Using CDN domain for video:", base);
+      console.log(appDomain,cdnDomain)
+    if (cdnDomain) {
+      const base = cdnDomain.startsWith("http")
+        ? cdnDomain
+        : `https://${cdnDomain}`;
+      
+      setVideoSrc(`${base}/${videoId}`);
     }
 
-    setIsLoading(false)
+    setIsLoading(false);
 
-    // Track view on mount
     trackView(videoId).then(() => {
-      setViews((prev) => prev + 1)
-    })
-  }, [videoId])
+      setViews((prev) => prev + 1);
+    });
+  }, [videoId, cdnDomain]);
 
   const handlePlay = () => {
-    setIsPlaying(true)
-    trackWatchProgress(videoId, 0)
-  }
+    setIsPlaying(true);
+    trackWatchProgress(videoId, 0);
+  };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -82,15 +89,26 @@ export default function WatchPage({ videoId }: { videoId: string }) {
                 <Link href={`/analytics/${videoId}`}>View Analytics</Link>
               </Button>
               <Input value={shareUrl} readOnly className="font-mono text-sm" />
-              <Button onClick={handleCopy} variant="outline" className="shrink-0 bg-transparent">
-                {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+              <Button
+                onClick={handleCopy}
+                variant="outline"
+                className="shrink-0 bg-transparent"
+                disabled={!shareUrl}
+              >
+                {copied ? (
+                  <Check className="size-4" />
+                ) : (
+                  <Copy className="size-4" />
+                )}
               </Button>
             </div>
           </Card>
 
           {/* Call to Action */}
           <Card className="p-8 text-center">
-            <h2 className="text-2xl font-semibold mb-3">Create your own screen recordings</h2>
+            <h2 className="text-2xl font-semibold mb-3">
+              Create your own screen recordings
+            </h2>
             <p className="text-muted-foreground mb-6">
               Record, edit, and share professional screen recordings in seconds
             </p>
@@ -104,5 +122,5 @@ export default function WatchPage({ videoId }: { videoId: string }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

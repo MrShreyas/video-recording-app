@@ -1,5 +1,5 @@
 # Use the official Node.js 18 Alpine image as the base
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Install ffmpeg
 RUN apk add --no-cache ffmpeg

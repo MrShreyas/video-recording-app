@@ -21,7 +21,6 @@ export default function WatchPage({ videoId }: { videoId: string }) {
   const shareUrl = appDomain ? `${appDomain}/api/v/${videoId}` : "";
 
   useEffect(() => {
-    // console.log("Using CDN domain for video:", base);
       console.log(appDomain,cdnDomain)
     if (cdnDomain) {
       const base = cdnDomain.startsWith("http")

@@ -66,10 +66,16 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     await coll.updateOne({ videoId: id }, update, { upsert: true });
 
     // Redirect to /watch/id with 302
-    return NextResponse.redirect(new URL(`/watch/${id}`, req.url), 302);
+    const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN;
+    if (!appDomain) {
+      console.error('NEXT_PUBLIC_APP_DOMAIN not set');
+      return NextResponse.redirect(new URL(`/watch/${id}`, req.url), 302);
+    }
+    return NextResponse.redirect(new URL(`/watch/${id}`, appDomain), 302);
   } catch (err: any) {
     console.error('Analytics update error:', err);
     // On error, still redirect or return error? Probably redirect to avoid breaking
-    return NextResponse.redirect(new URL(`/watch/${params.id}`, req.url), 302);
+    const appDomain = process.env.NEXT_PUBLIC_APP_DOMAIN || req.url;
+    return NextResponse.redirect(new URL(`/watch/${params.id}`, appDomain), 302);
   }
 }

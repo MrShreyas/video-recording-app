@@ -31,7 +31,7 @@ COPY . .
 RUN pnpm run build
 
 # Expose port
-EXPOSE 3000
+EXPOSE 4000
 
 # Production mode
 ENV NODE_ENV=production
